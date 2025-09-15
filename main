@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>JharkhandAI Marketplace</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+    body { background: #fff; color: #000; -webkit-font-smoothing:antialiased; }
+    header { background: #3a9b26; padding: 10px 20px; display:flex; align-items:center; justify-content:space-between; color:#fff; flex-wrap:wrap; position:relative; }
+    .logo { font-weight:600; font-size:20px; }
+    nav { display:flex; gap:10px; align-items:center; }
+    nav a { color:#fff; text-decoration:none; margin:0 8px; font-weight:500; }
+    .search-cart { display:flex; align-items:center; gap:10px; }
+    .search-cart input[type="search"] { padding:7px 10px; border-radius:20px; border:none; outline:none; width:180px; }
+    .cart { position:relative; font-size:20px; cursor:pointer; user-select:none; }
+    .cart span { position:absolute; top:-6px; right:-12px; background:red; color:#fff; font-size:12px; padding:2px 6px; border-radius:50%; }
+    .hero { text-align:left; padding:30px 40px; display:flex; gap:30px; align-items:center; justify-content:space-between; border-bottom:1px solid #ddd; }
+    .hero .left { max-width:65%; }
+    .hero h1 { font-size:30px; font-weight:600; color:#111; }
+    .hero p { margin-top:10px; font-size:14px; color:#222; }
+    .hero button { margin-top:15px; background:#3a9b26; color:#fff; border:none; padding:10px 18px; border-radius:20px; cursor:pointer; font-weight:500; }
+    .categories { display:flex; gap:18px; padding:20px 40px; justify-content:flex-end; align-items:center; }
+    .cat { background:#a6d88d; padding:18px 26px; border-radius:12px; cursor:pointer; min-width:150px; text-align:center; font-weight:600; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.06); }
+    .cat small { display:block; font-weight:500; font-size:12px; margin-top:6px; }
+    .filters-search { display:flex; gap:20px; padding:16px 40px; background:#f2f2f2; align-items:flex-start; flex-wrap:wrap; }
+    .filters { width:260px; background:#fff; padding:18px; border-radius:10px; box-shadow:0 1px 0 rgba(0,0,0,0.06); }
+    .filters h3 { font-size:16px; margin-bottom:10px; }
+    .filters label { display:block; margin:8px 0; font-size:14px; }
+    .filters input[type="range"] { width:100%; -webkit-appearance:none; appearance:none; height:6px; background:#efefef; border-radius:6px; outline:none; }
+    .price-indicator { margin-top:6px; font-weight:600; font-size:14px; color:#000; }
+    .marketplace { flex:1; display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px; }
+    .product { border:1px solid #ccc; border-radius:10px; padding:12px; background:#f9f9f9; min-height:150px; display:flex; flex-direction:column; justify-content:space-between; }
+    .verified { background:#3a9b26; color:#fff; display:inline-block; padding:4px 10px; border-radius:8px; font-size:12px; margin-bottom:8px; align-self:flex-start; }
+    .product h4 { font-size:14px; font-weight:600; margin-bottom:6px; }
+    .product p { font-size:13px; color:#333; margin-bottom:8px; }
+    .price { font-weight:700; background:#000; color:#fff; padding:5px 8px; border-radius:6px; display:inline-block; font-size:13px; }
+    .rating { margin-left:8px; font-size:13px; font-weight:600; color:#333; }
+    .actions { display:flex; gap:10px; margin-top:10px; }
+    .btn { padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:600; }
+    .btn.add { background:#3a9b26; color:#fff; }
+    .btn.view { background:#fff; color:#000; border:2px solid #3a9b26; }
+    /* small helper for disabled state */
+    .btn[disabled] { opacity:0.6; cursor:not-allowed; }
+    /* hamburger for mobile */
+    .hamburger { display:none; cursor:pointer; gap:4px; flex-direction:column; }
+    .hamburger span { height:3px; width:22px; background:#fff; border-radius:2px; display:block; }
+    /* modal */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:1000; opacity:0; pointer-events:none; transition:opacity .18s; }
+    .modal-overlay.visible { opacity:1; pointer-events:auto; }
+    .modal { background:#fff; width:90%; max-width:480px; border-radius:10px; padding:18px; box-shadow:0 8px 30px rgba(0,0,0,0.2); }
+    .modal h3 { margin-bottom:8px; }
+    .modal p { margin-bottom:12px; color:#333; }
+    .modal .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:10px; }
+    /* toast */
+    .toast { position:fixed; right:18px; top:18px; background:#222; color:#fff; padding:10px 14px; border-radius:8px; z-index:1200; opacity:0; transform:translateY(-6px); transition:opacity .18s, transform .18s; }
+    .toast.show { opacity:1; transform:translateY(0); }
+    /* responsive */
+    @media (max-width:1024px) { .filters { width:34%; } }
+    @media (max-width:768px) {
+      nav { display:none; position:absolute; top:56px; left:0; right:0; background:#3a9b26; flex-direction:column; padding:10px 20px; gap:8px; }
+      nav.active { display:flex; }
+      .hamburger { display:flex; }
+      .hero { padding:18px 20px; flex-direction:column; align-items:flex-start; gap:12px; }
+      .categories { padding:12px 20px; justify-content:flex-start; gap:12px; }
+      .filters-search { padding:12px 20px; flex-direction:column; }
+      .filters { width:100%; min-width:0; }
+      .marketplace { width:100%; }
+      .search-cart input[type="search"]{ width:120px; }
+    }
+    @media (max-width:480px){
+      .hero h1 { font-size:22px; }
+      .hero .left { max-width:100%; }
+      .categories { gap:10px; flex-direction:column; align-items:stretch; }
+      .cat { min-width: auto; text-align:left; padding:14px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="logo">JharkhandAI</div>
+      <div class="hamburger" id="hamburger" aria-label="Toggle menu" title="Menu">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <nav id="navbar" aria-label="Main navigation">
+      <a href="#" data-nav>Home</a>
+      <a href="#" data-nav>Marketplace</a>
+      <a href="#" data-nav>Destinations</a>
+      <a href="#" data-nav>Events</a>
+    </nav>
+
+    <div class="search-cart">
+      <input id="searchInput" type="search" placeholder="Search products" aria-label="Search products" />
+      <div class="cart" id="cart">🛒<span id="cartCount">3</span></div>
+      <div class="profile" aria-hidden="true">👤</div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="left">
+      <h1>Discover Authentic Jharkhand</h1>
+      <p>From Handcrafted goodies to beautiful artisanship, explore the best local culture and craftmanship</p>
+      <button id="startBtn">Start Exploring</button>
+    </div>
+    <div style="flex:0 0 auto;">
+      <!-- right side kept empty to match screenshot spacing -->
+    </div>
+  </section>
+
+  <section class="categories" aria-label="Categories">
+    <div class="cat" data-cat="all">All Categories<br><small>See everything</small></div>
+    <div class="cat" data-cat="handicrafts">Handicrafts<br><small>Traditional crafts</small></div>
+    <div class="cat" data-cat="food">Food<br><small>Local Cuisine</small></div>
+    <div class="cat" data-cat="homestays">Homestays<br><small>Local Housing Stays</small></div>
+    <div class="cat" data-cat="eco">Eco-Tours<br><small>Nature adventures</small></div>
+  </section>
+
+  <section class="filters-search">
+    <aside class="filters" aria-label="Filters panel">
+      <h3>Filters</h3>
+
+      <label><input type="checkbox" class="filter-cat" value="handicrafts" /> Handicrafts</label>
+      <label><input type="checkbox" class="filter-cat" value="tours" /> Tours</label>
+      <label><input type="checkbox" class="filter-cat" value="homestays" /> Homestays</label>
+
+      <div style="margin-top:10px;font-weight:600;">Price Range</div>
+      <input id="priceRange" type="range" min="0" max="10000" step="50" value="10000" />
+      <div class="price-indicator" id="priceIndicator">Max: ₹10,000</div>
+
+      <div style="margin-top:12px;font-weight:600;">Rating</div>
+      <label><input type="radio" name="rating" class="filter-rating" value="5" /> ★★★★★ 5 stars</label>
+      <label><input type="radio" name="rating" class="filter-rating" value="4" /> ★★★★☆ 4+ stars</label>
+      <label><input type="radio" name="rating" class="filter-rating" value="3" /> ★★★☆☆ 3+ stars</label>
+
+      <div style="margin-top:12px;font-weight:600;">District</div>
+      <select id="districtSelect">
+        <option value="all">All districts</option>
+        <option value="ranchi">Ranchi</option>
+        <option value="dhanbad">Dhanbad</option>
+      </select>
+      <div style="margin-top:14px;">
+        <button id="clearFilters" class="btn" style="background:#eee;border:1px solid #ccc;">Clear Filters</button>
+      </div>
+    </aside>
+
+    <div class="marketplace" id="marketplace" aria-live="polite">
+      <!-- product cards include data attributes used for filtering -->
+      <article class="product" data-id="p1" data-category="handicrafts" data-price="800" data-rating="4.5">
+        <div>
+          <div class="verified">Verified</div>
+          <h4>Handmade Pottery</h4>
+          <p>Clay Pottery Set<br><small>By random name</small></p>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <span class="price">₹800</span>
+            <span class="rating">★ 4.5</span>
+          </div>
+          <div class="actions">
+            <button class="btn add">Add to Cart</button>
+            <button class="btn view">View</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="product" data-id="p2" data-category="homestays" data-price="1300" data-rating="4.6">
+        <div>
+          <div class="verified">Verified</div>
+          <h4>Tribal Homestay</h4>
+          <p>Village Homestay<br><small>By Local Housing</small></p>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <span class="price">₹1,300/night</span>
+            <span class="rating">★ 4.6</span>
+          </div>
+          <div class="actions">
+            <button class="btn add book">Book now</button>
+            <button class="btn view">View</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="product" data-id="p3" data-category="food" data-price="450" data-rating="4.2">
+        <div>
+          <div class="verified">Verified</div>
+          <h4>Local Cuisine</h4>
+          <p>Traditional mix<br><small>By Local Chef</small></p>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <span class="price">₹450</span>
+            <span class="rating">★ 4.2</span>
+          </div>
+          <div class="actions">
+            <button class="btn add">Add to Cart</button>
+            <button class="btn view">View</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="product" data-id="p4" data-category="events" data-price="750" data-rating="4.4">
+        <div>
+          <div class="verified">Verified</div>
+          <h4>Cultural Event</h4>
+          <p>Folk Dance Shop<br><small>By Culture Center</small></p>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <span class="price">₹750</span>
+            <span class="rating">★ 4.4</span>
+          </div>
+          <div class="actions">
+            <button class="btn add">Add to Cart</button>
+            <button class="btn view">View</button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Modal used for View & Booking -->
+  <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h3 id="modalTitle">Product</h3>
+      <div id="modalBody"></div>
+      <div class="modal-actions">
+        <button id="modalClose" class="btn" style="background:#eee;border:1px solid #ccc;">Close</button>
+        <button id="modalPrimary" class="btn add">Add to Cart</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite">Added to cart</div>
+
+  <script>
+    // ---------- Utilities ----------
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+    // ---------- Elements ----------
+    const hamburger = $('#hamburger');
+    const navbar = $('#navbar');
+    const searchInput = $('#searchInput');
+    const priceRange = $('#priceRange');
+    const priceIndicator = $('#priceIndicator');
+    const filterCatEls = $$('.filter-cat');
+    const ratingRadios = $$('.filter-rating');
+    const clearFiltersBtn = $('#clearFilters');
+    const marketplace = $('#marketplace');
+    const productCards = $$('.product', marketplace);
+    const cartCountEl = $('#cartCount');
+    const toast = $('#toast');
+    const modalOverlay = $('#modalOverlay');
+    const modalTitle = $('#modalTitle');
+    const modalBody = $('#modalBody');
+    const modalPrimary = $('#modalPrimary');
+    const modalClose = $('#modalClose');
+    const startBtn = $('#startBtn');
+    const categories = $$('.cat');
+
+    // ---------- State ----------
+    let cartCount = parseInt(cartCountEl.textContent || '0', 10);
+    let activeModalProduct = null;
+    let searchTimeout = null;
+
+    // ---------- Nav toggle ----------
+    hamburger.addEventListener('click', () => navbar.classList.toggle('active'));
+
+    // ---------- Start Exploring scroll ----------
+    startBtn.addEventListener('click', () => {
+      // Scroll to marketplace area
+      marketplace.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    // ---------- Price indicator & filter ----------
+    function updatePriceIndicator() {
+      const val = parseInt(priceRange.value, 10);
+      priceIndicator.textContent = Max: ₹${val.toLocaleString('en-IN')} / ₹10,000;
+    }
+    priceRange.addEventListener('input', () => {
+      updatePriceIndicator();
+      filterProducts();
+    });
+    updatePriceIndicator();
+
+    // ---------- Category buttons (top) ----------
+    categories.forEach(catEl => {
+      catEl.addEventListener('click', () => {
+        const cat = catEl.dataset.cat;
+        // clear category checkboxes
+        filterCatEls.forEach(c => c.checked = false);
+        if (cat !== 'all') {
+          // check matching checkbox if available, else use direct filtering
+          const target = filterCatEls.find(c => c.value === cat);
+          if (target) target.checked = true;
+        }
+        // if 'all', nothing selected -> show all
+        filterProducts();
+      });
+    });
+
+    // ---------- Filter inputs ----------
+    filterCatEls.forEach(cb => cb.addEventListener('change', filterProducts));
+    ratingRadios.forEach(rb => rb.addEventListener('change', filterProducts));
+
+    clearFiltersBtn.addEventListener('click', () => {
+      filterCatEls.forEach(c => c.checked = false);
+      ratingRadios.forEach(r => r.checked = false);
+      priceRange.value = 10000;
+      updatePriceIndicator();
+      $('#districtSelect').value = 'all';
+      searchInput.value = '';
+      filterProducts();
+    });
+
+    // ---------- Search (debounced) ----------
+    function debounce(fn, wait = 250) {
+      let t;
+      return (...args) => {
+        clearTimeout(t);
+        t = setTimeout(() => fn(...args), wait);
+      };
+    }
+    const debouncedFilter = debounce(filterProducts, 220);
+    searchInput.addEventListener('input', debouncedFilter);
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') filterProducts();
+    });
+
+    // ---------- Product buttons (Add, View, Book) ----------
+    productCards.forEach(card => {
+      const addBtn = $('.btn.add', card);
+      const viewBtn = $('.btn.view', card);
+      const bookBtn = $('.btn.book', card);
+
+      // Add to cart (or Book now uses same)
+      if (addBtn) {
+        addBtn.addEventListener('click', () => {
+          cartCount += 1;
+          cartCountEl.textContent = cartCount;
+          showToast('Added to cart');
+          // visual feedback: temporarily disable button then re-enable
+          addBtn.disabled = true;
+          const original = addBtn.textContent;
+          addBtn.textContent = 'Added';
+          setTimeout(() => { addBtn.disabled = false; addBtn.textContent = original; }, 900);
+        });
+      }
+
+      // Book now opens modal for booking
+      if (bookBtn) {
+        bookBtn.addEventListener('click', () => {
+          openModal(card, { mode: 'book' });
+        });
+      }
+
+      // View product details in modal
+      if (viewBtn) {
+        viewBtn.addEventListener('click', () => {
+          openModal(card, { mode: 'view' });
+        });
+      }
+    });
+
+    // ---------- modal helpers ----------
+    function openModal(card, opts = { mode: 'view' }) {
+      const title = card.querySelector('h4').textContent;
+      const desc = card.querySelector('p').innerHTML;
+      const priceText = card.querySelector('.price').textContent;
+      const ratingText = card.dataset.rating || '';
+      activeModalProduct = card;
+
+      modalTitle.textContent = title;
+      modalBody.innerHTML = '';
+
+      if (opts.mode === 'book') {
+        modalBody.innerHTML = `
+          <p>${desc}</p>
+          <p><strong>Price:</strong> ${priceText}</p>
+          <label>Number of nights: <input id="nightsInput" type="number" min="1" max="30" value="1" style="margin-left:8px;padding:6px;border-radius:6px;border:1px solid #ddd;width:72px;"></label>
+        `;
+        modalPrimary.textContent = 'Confirm Booking';
+      } else {
+        modalBody.innerHTML = <p>${desc}</p><p><strong>Price:</strong> ${priceText}</p><p><strong>Rating:</strong> ${ratingText}</p>;
+        modalPrimary.textContent = 'Add to Cart';
+      }
+
+      modalPrimary.onclick = () => {
+        if (opts.mode === 'book') {
+          // pretend to book and add to cart (for demo)
+          cartCount += 1;
+          cartCountEl.textContent = cartCount;
+          showToast('Booking confirmed & added to cart');
+        } else {
+          cartCount += 1;
+          cartCountEl.textContent = cartCount;
+          showToast('Added to cart');
+        }
+        closeModal();
+      };
+
+      modalOverlay.classList.add('visible');
+      modalOverlay.setAttribute('aria-hidden', 'false');
+    }
+
+    modalClose.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) closeModal();
+    });
+
+    function closeModal() {
+      modalOverlay.classList.remove('visible');
+      modalOverlay.setAttribute('aria-hidden', 'true');
+      activeModalProduct = null;
+    }
+
+    // ---------- toast ----------
+    let toastTimer = null;
+    function showToast(msg = 'Saved') {
+      clearTimeout(toastTimer);
+      toast.textContent = msg;
+      toast.classList.add('show');
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 1200);
+    }
+
+    // ---------- filtering logic ----------
+    function filterProducts() {
+      const selectedCats = filterCatEls.filter(cb => cb.checked).map(cb => cb.value);
+      const selectedRatingRadio = ratingRadios.find(rb => rb.checked);
+      const minRating = selectedRatingRadio ? parseFloat(selectedRatingRadio.value, 10) : 0;
+      const maxPrice = clamp(parseInt(priceRange.value, 10) || 10000, 0, 10000);
+      const query = (searchInput.value || '').trim().toLowerCase();
+
+      productCards.forEach(card => {
+        const price = parseFloat(card.dataset.price) || 0;
+        const rating = parseFloat(card.dataset.rating) || 0;
+        const category = (card.dataset.category || '').toLowerCase();
+        const title = (card.querySelector('h4')?.textContent || '').toLowerCase();
+        const desc = (card.querySelector('p')?.textContent || '').toLowerCase();
+
+        let visible = true;
+
+        // category filtering: if any checkbox selected, require match
+        if (selectedCats.length > 0) {
+          if (!selectedCats.includes(category)) visible = false;
+        }
+
+        // price
+        if (price > maxPrice) visible = false;
+
+        // rating
+        if (rating < minRating) visible = false;
+
+        // search query match title/desc
+        if (query) {
+          if (!(title.includes(query) || desc.includes(query))) visible = false;
+        }
+
+        card.style.display = visible ? '' : 'none';
+      });
+    }
+
+    // initial filter (show all)
+    filterProducts();
+
+    // ---------- keyboard accessibility: Enter on focused product view/add buttons ----------
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+        navbar.classList.remove('active');
+      }
+    });
+
+    // ---------- accessibility: focusable product actions ----------
+    productCards.forEach(card => {
+      $$('.btn', card).forEach(b => b.setAttribute('tabindex', '0'));
+    });
+
+    // ---------- initializations ----------
+    // ensure price indicator reflects max on load
+    updatePriceIndicator();
+
+    // keep cartCount updated UI
+    cartCountEl.textContent = cartCount;
+
+  </script>
+</body>
+</html>
