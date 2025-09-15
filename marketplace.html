@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>JharkhandAI — Marketplace</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="left">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/0/01/Blue_logo.svg" alt="JharkhandAI logo" class="logo-small">
+      <span class="brand">JharkhandAI</span>
+    </div>
+    <nav class="main-nav">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="marketplace.html" class="nav-link active">Marketplace</a>
+      <a href="destinations.html" class="nav-link">Destinations</a>
+      <a href="events.html" class="nav-link">Events</a>
+    </nav>
+    <div class="right">
+      <a href="login.html" id="loginLink2" class="link small-link">Login</a>
+      <a href="cart.html" class="link small-link">🛒 <span id="cart-count-2">0</span></a>
+    </div>
+  </header>
+
+  <main class="page-grid">
+    <aside class="filters">
+      <h3>Filters</h3>
+      <div class="filter-group">
+        <label><input type="checkbox" class="cat-filter" value="handicraft"> Handicrafts</label>
+        <label><input type="checkbox" class="cat-filter" value="jewelry"> Jewelry</label>
+        <label><input type="checkbox" class="cat-filter" value="textile"> Textiles</label>
+        <label><input type="checkbox" class="cat-filter" value="decor"> Home Decor</label>
+      </div>
+
+      <div class="filter-group">
+        <label for="priceRange">Price Range:</label>
+        <input id="priceRange" type="range" min="0" max="10000" step="50" value="10000">
+        <div class="price-ind">Max Price: ₹<span id="priceValue">10,000</span></div>
+      </div>
+
+      <div class="filter-group">
+        <label>Rating</label>
+        <label><input name="rating" class="rating-filter" type="radio" value="0" checked> All</label>
+        <label><input name="rating" class="rating-filter" type="radio" value="4"> 4+ stars</label>
+        <label><input name="rating" class="rating-filter" type="radio" value="4.5"> 4.5+ stars</label>
+      </div>
+
+      <button id="clearFilters" class="btn small">Clear Filters</button>
+    </aside>
+
+    <section class="marketplace" id="marketplace">
+      <div class="controls">
+        <input id="searchProducts" type="search" placeholder="Search products..." />
+        <div class="sort">
+          <select id="sortSelect">
+            <option value="relevance">Sort: Relevance</option>
+            <option value="price_asc">Price — low to high</option>
+            <option value="price_desc">Price — high to low</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="productGrid" class="product-grid"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <small>© 2025 JharkhandAI — Marketplace</small>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
